@@ -15,23 +15,21 @@ import aiohttp
 from hbmqtt.client import MQTTClient, ClientException
 from hbmqtt.mqtt.constants import QOS_2
 
-# try:
-#     from config import AFRA_TOKEN
-# except ImportError:
-#     AFRA_TOKEN = "foo"
-
-AFRA_TOKEN = "Coog9wah6AiPao8E"
-AFRA_NOTIFICATION_CHANNELS = ["#afra-test"]
+from configparser import ConfigParser
 
 LOG = logging.getLogger("v4runa")
 
 class MyOwnBot(pydle.Client):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, join_channels=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.commands = {}
+        self.__join_channels = []
+        if join_channels:
+            self.__join_channels = join_channels
 
     async def on_connect(self):
-        await self.join('#afra-test')
+        for channel in self.__join_channels:
+            await self.join(channel)
 
     async def on_message(self, target, source, message):
         # empty message
@@ -50,7 +48,7 @@ class MyOwnBot(pydle.Client):
         if command in self.commands:
             await self.commands[command](self, target, source, message)
         else:
-            LOG.info("Unknown command '%s'.", command)
+            LOG.debug("Unknown command '%s'.", command)
 
     def register_command(self, command, func):
         """ only coroutine's are supported as func
@@ -93,16 +91,14 @@ _OPEN = 1
 _CLOSED = 2
 _UNKNOWN = 3
 
-AFRA_NOTIFICATION_CHANNELS = ["#afra-test"]
-
-async def update_spaceapi(state):
+async def update_spaceapi(state, token):
     LOG.info("updating spaceapi to state %s", state)
     if state not in [_OPEN, _CLOSED]:
         # TODO: unknown states
         return
 
     state = 0 if state == _CLOSED else 1
-    url = 'https://spaceapi.afra.fe80.eu/v1/status/{}/{}'.format(AFRA_TOKEN, state)
+    url = 'https://spaceapi.afra.fe80.eu/v1/status/{}/{}'.format(token, state)
 
     try:
         async with aiohttp.ClientSession(raise_for_status=True) as session:
@@ -115,9 +111,32 @@ async def update_spaceapi(state):
         return None
 
 class V4runaBot():
-    def __init__(self):
+    def __init__(self, configpath):
         self.mqcli = None
-        self.irc = MyOwnBot("v4runa", realname="AfRA bot")
+
+        config = ConfigParser()
+        config.read(configpath)
+
+        self.user = config.get("irc", "user")
+        self.realname = config.get("irc", "realname", fallback="real name")
+        self.server = config.get("irc", "server")
+        self.channels = config.get("irc", "channels", fallback="").split()
+
+        password = config.get("irc", "password", fallback=None)
+        if password is not None:
+            self.irc = MyOwnBot(
+                self.user,
+                sasl_username=self.user,
+                sasl_password=password,
+                realname=self.realname,
+                join_channels=self.channels)
+        else:
+            self.irc = MyOwnBot(self.user, realname=self.realname, join_channels=self.channels)
+
+        asyncio.ensure_future(self.irc.connect(self.server, tls=True), loop=loop)
+
+        self.spacetoken = config.get("spaceapi", "token")
+
         self.store = Store(self)
         self.irc.register_command("open?", self.command_is_open)
         self.irc.register_command("open!", self.command_open)
@@ -157,7 +176,7 @@ class V4runaBot():
         state = await self.store.get('open')
         if str(ts_state) != str(state, 'utf-8'):
             await self.store.set('open', ts_state)
-            await update_spaceapi(ts_state)
+            await update_spaceapi(ts_state, self.spacetoken)
             await self.say_state(ts_state)
 
     async def say_state(self, state, target=None):
@@ -171,7 +190,7 @@ class V4runaBot():
         if target:
             await self.irc.message(target, "The space is now %s." % human[state])
         else:
-            for channel in AFRA_NOTIFICATION_CHANNELS:
+            for channel in self.channels:
                 await self.irc.message(channel, "The space is now %s." % human[state])
                 if state == _CLOSED:
                     await self.irc.message(channel, ".purge")
@@ -248,8 +267,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     loop = asyncio.get_event_loop()
-    v4runa = V4runaBot()
-    asyncio.ensure_future(v4runa.irc.connect('chat.freenode.net', tls=True), loop=loop)
+    v4runa = V4runaBot(configpath="v4runa.cfg")
     asyncio.ensure_future(v4runa.wait_kick_space(), loop=loop)
     asyncio.ensure_future(v4runa.check_room_status(), loop=loop)
     loop.run_forever()
