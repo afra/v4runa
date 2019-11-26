@@ -1,0 +1,17 @@
+[Unit]
+Description=the bot v4runa living in #afra on freenode
+
+[Service]
+User=afra
+Group=afra
+
+Type=simple
+ExecStart=/home/afra/v4runa/venv/bin/python /home/afra/v4runa/main.py
+WorkingDirectory=/home/afra/v4runa/
+
+KillMode=process
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
