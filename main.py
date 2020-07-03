@@ -119,7 +119,7 @@ class V4runaBot():
         config = ConfigParser()
         config.read(configpath)
 
-        logging_file = config.get("logging", "yamlconfig")
+        logging_file = config.get("logging", "yamlconfig", fallback=None)
         if logging_file:
             configyaml = yaml.load(open(logging_file, 'r'))
             logging.config.dictConfig(configyaml)
