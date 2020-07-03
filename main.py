@@ -4,6 +4,8 @@
 # 2019 Alexander Couzens <lynxis@fe80.eu>
 
 import logging
+import logging.config
+import yaml
 import asyncio
 import async_timeout
 from datetime import datetime
@@ -116,6 +118,11 @@ class V4runaBot():
 
         config = ConfigParser()
         config.read(configpath)
+
+        logging_file = config.get("logging", "yamlconfig")
+        if logging_file:
+            configyaml = yaml.load(open(logging_file, 'r'))
+            logging.config.dictConfig(configyaml)
 
         self.user = config.get("irc", "user")
         self.realname = config.get("irc", "realname", fallback="real name")
