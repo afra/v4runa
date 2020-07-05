@@ -149,6 +149,7 @@ class V4runaBot():
         self.irc.register_command("open!", self.command_open)
         self.irc.register_command("close!", self.command_close)
         self.irc.register_command("closed!", self.command_close)
+        self.irc.register_command("who", self.command_who)
 
     async def get_space(self):
         """ calculate by the timestamps if the space is open or not """
@@ -269,6 +270,12 @@ class V4runaBot():
         await self.set_space(_CLOSED)
         await self.check_state_change()
         await self.irc.message(target, "Noted.")
+
+    async def command_who(self, irc, target, source, _message):
+        # TODO: find out where the BTC is located
+        await self.irc.message(target,
+                               "Hi %s, I'm v4runa, the main AI construct. I'm integrated into the Bureau of Technology"
+                               "Control head quarters. You can read more about me in the book Influx." % source)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
