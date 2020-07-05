@@ -150,6 +150,8 @@ class V4runaBot():
         self.irc.register_command("close!", self.command_close)
         self.irc.register_command("closed!", self.command_close)
         self.irc.register_command("who", self.command_who)
+        self.irc.register_command("help", self.command_help)
+        self.irc.register_command("commands", self.command_help)
 
     async def get_space(self):
         """ calculate by the timestamps if the space is open or not """
@@ -270,6 +272,16 @@ class V4runaBot():
         await self.set_space(_CLOSED)
         await self.check_state_change()
         await self.irc.message(target, "Noted.")
+
+    async def command_help(self, irc, target, source, _message):
+        cmds = []
+        for key in self.irc.commands.keys():
+            cmds += [key]
+        cmds.sort()
+        cmds = " ".join(cmds)
+        message = "I'm able to follow commands. They must start with a . (dot). E.g. \".who\". I can speak the following commands: " + cmds
+
+        await self.irc.notice(target, message)
 
     async def command_who(self, irc, target, source, _message):
         # TODO: find out where the BTC is located
