@@ -198,12 +198,12 @@ class V4runaBot():
 
         LOG.info("The space is now %s. With target=%s", human[state], target)
         if target:
-            await self.irc.message(target, "The space is now %s." % human[state])
+            await self.irc.notice(target, "The space is now %s." % human[state])
         else:
             for channel in self.channels:
-                await self.irc.message(channel, "The space is now %s." % human[state])
+                await self.irc.notice(channel, "The space is now %s." % human[state])
                 if state == _CLOSED:
-                    await self.irc.message(channel, ".purge")
+                    await self.irc.notice(channel, ".purge")
 
     async def check_room_status(self):
         """
@@ -255,23 +255,23 @@ class V4runaBot():
         LOG.info("is open? %s, %s", status, timestamp)
 
         if status == _CLOSED:
-            await self.irc.message(target, "The space is closed.")
+            await self.irc.notice(target, "The space is closed.")
         elif status == _OPEN:
-            await self.irc.message(target, "The space is open.")
+            await self.irc.notice(target, "The space is open.")
         else:
-            await self.irc.message(target, "Who knows if the space is open or not")
+            await self.irc.notice(target, "Who knows if the space is open or not")
 
     # open!
     async def command_open(self, irc, target, _source, _message):
         await self.set_space(_OPEN)
         await self.check_state_change()
-        await self.irc.message(target, "Noted.")
+        await self.irc.notice(target, "Noted.")
 
     # closed! or close!
     async def command_close(self, irc, target, _source, _message):
         await self.set_space(_CLOSED)
         await self.check_state_change()
-        await self.irc.message(target, "Noted.")
+        await self.irc.notice(target, "Noted.")
 
     async def command_help(self, irc, target, source, _message):
         cmds = []
@@ -285,6 +285,7 @@ class V4runaBot():
 
     async def command_who(self, irc, target, source, _message):
         # TODO: find out where the BTC is located
+        # explicit using message here, because we're talking to a human.
         await self.irc.message(target,
                                "Hi %s, I'm v4runa, the main AI construct. I'm integrated into the Bureau of Technology"
                                "Control head quarters. You can read more about me in the book Influx." % source)
