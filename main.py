@@ -233,24 +233,27 @@ class V4runaBot():
         This function handles this event.
         """
 
+        self.mqcli = MQTTClient(config=MQTT_CONFIG)
         while True:
-            self.mqcli = MQTTClient(config=MQTT_CONFIG)
             try:
                 await self.mqcli.connect('mqtt://localhost/')
-            except:
-                await asyncio.sleep(10)
-                continue
-
-            try:
                 await self.mqcli.subscribe([
                     ('afra/door', QOS_2),
                     ])
-                await self.mqcli.deliver_message()
-                # TODO: ignoring the payload for now
-                await self.store.set('door_kicked_timestamp', datetime.now().timestamp())
-                await self.check_state_change()
-            except ClientException as ce:
+            except:
+                await asyncio.sleep(10)
                 continue
+            LOG.info("mqtt: connected")
+
+            while True:
+                try:
+                    message = await self.mqcli.deliver_message()
+                    LOG.info("mqtt: delivered a message")
+                    # TODO: ignoring the payload for now
+                    await self.store.set('door_kicked_timestamp', datetime.now().timestamp())
+                    await self.check_state_change()
+                except ClientException as ce:
+                    break
 
     async def set_space(self, state):
         """ use when setting the space manually """
