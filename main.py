@@ -124,8 +124,9 @@ async def update_spaceapi(state, token):
         return None
 
 class V4runaBot():
-    def __init__(self, configpath):
+    def __init__(self, configpath, loop):
         self.mqcli = None
+        self.loop = loop
 
         config = ConfigParser()
         config.read(configpath)
@@ -233,7 +234,7 @@ class V4runaBot():
         This function handles this event.
         """
 
-        self.mqcli = MQTTClient(config=MQTT_CONFIG)
+        self.mqcli = MQTTClient(config=MQTT_CONFIG, loop=self.loop)
         while True:
             try:
                 await self.mqcli.connect('mqtt://localhost/')
@@ -308,7 +309,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     loop = asyncio.get_event_loop()
-    v4runa = V4runaBot(configpath="v4runa.cfg")
+    v4runa = V4runaBot(configpath="v4runa.cfg", loop=loop)
     asyncio.ensure_future(v4runa.wait_kick_space(), loop=loop)
     asyncio.ensure_future(v4runa.check_room_status(), loop=loop)
     loop.run_forever()
