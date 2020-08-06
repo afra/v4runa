@@ -30,6 +30,9 @@ MQTT_CONFIG = {
 }
 
 class MyOwnBot(pydle.Client):
+    # always reconnect
+    RECONNECT_MAX_ATTEMPTS = 2**31
+
     def __init__(self, *args, join_channels=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.commands = {}
