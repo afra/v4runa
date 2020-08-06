@@ -21,6 +21,14 @@ from configparser import ConfigParser
 
 LOG = logging.getLogger("v4runa")
 
+MQTT_CONFIG = {
+    'keep_alive': 30,
+    'ping_delay': 5,
+    'auto_reconnect': True,
+    'reconnect_max_interval': 5,
+    'reconnect_retries': 100,
+}
+
 class MyOwnBot(pydle.Client):
     def __init__(self, *args, join_channels=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -223,7 +231,7 @@ class V4runaBot():
         """
 
         while True:
-            self.mqcli = MQTTClient()
+            self.mqcli = MQTTClient(config=MQTT_CONFIG)
             try:
                 await self.mqcli.connect('mqtt://localhost/')
             except:
