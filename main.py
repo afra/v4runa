@@ -81,7 +81,10 @@ class Store():
 
     async def _connect(self):
         if self._conn is None:
-            self._conn = await aioredis.create_redis_pool('redis://localhost')
+            try:
+                self._conn = await aioredis.from_url("redis://localhost", encoding="utf-8", decode_responses=True)
+            except:
+                LOG.exception("Failed to connect to redis")
 
     async def set(self, key, value):
         await self._connect()
@@ -196,7 +199,7 @@ class V4runaBot():
     async def check_state_change(self):
         ts_state, _ = await self.get_space()
         state = await self.store.get('open')
-        if str(ts_state) != str(state, 'utf-8'):
+        if str(ts_state) != str(state):
             await self.store.set('open', ts_state)
             await update_spaceapi(ts_state, self.spacetoken)
             await self.say_state(ts_state)
