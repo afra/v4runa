@@ -242,6 +242,7 @@ class V4runaBot():
                     ('afra/door', QOS_2),
                     ])
             except:
+                LOG.warning("mqtt: failed to connect. Retrying in 10 seconds.")
                 await asyncio.sleep(10)
                 continue
             LOG.info("mqtt: connected")
@@ -254,6 +255,7 @@ class V4runaBot():
                     await self.store.set('door_kicked_timestamp', datetime.now().timestamp())
                     await self.check_state_change()
                 except ClientException as ce:
+                    LOG.warning("mqtt: failed to connect. Retrying in 10 seconds.")
                     break
 
     async def set_space(self, state):
