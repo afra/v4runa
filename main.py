@@ -14,8 +14,8 @@ import pydle
 import aioredis
 import aiohttp
 
-from hbmqtt.client import MQTTClient, ClientException
-from hbmqtt.mqtt.constants import QOS_2
+from amqtt.client import MQTTClient, ClientException
+from amqtt.mqtt.constants import QOS_2
 
 from configparser import ConfigParser
 

@@ -11,7 +11,7 @@ pydle = "*"
 aioredis = "==2.0.0"
 aiohttp = "*"
 async-timeout = "*"
-hbmqtt = "*"
+amqtt = "*"
 pure-sasl = "*"
 
 [requires]
