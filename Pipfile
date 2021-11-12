@@ -8,7 +8,7 @@ pure-sasl = "*"
 
 [packages]
 pydle = "*"
-aioredis = "*"
+aioredis = "==2.0.0"
 aiohttp = "*"
 async-timeout = "*"
 hbmqtt = "*"
