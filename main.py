@@ -82,7 +82,7 @@ class Store():
     async def _connect(self):
         if self._conn is None:
             try:
-                self._conn = await aioredis.from_url("redis://localhost", encoding="utf-8", decode_responses=True)
+                self._conn = await aioredis.from_url("redis://%s" % self.server, encoding="utf-8", decode_responses=True)
             except:
                 LOG.exception("Failed to connect to redis")
 
@@ -159,7 +159,7 @@ class V4runaBot():
 
         self.spacetoken = config.get("spaceapi", "token")
 
-        self.store = Store(self)
+        self.store = Store()
         self.irc.register_command("open?", self.command_is_open)
         self.irc.register_command("open!", self.command_open)
         self.irc.register_command("close!", self.command_close)
