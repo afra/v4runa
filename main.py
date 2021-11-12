@@ -228,7 +228,10 @@ class V4runaBot():
         To close the afra without a command, timers must be checked.
         """
         while True:
-            await self.check_state_change()
+            try:
+                await self.check_state_change()
+            except:
+                LOG.exception("Failed to check state change")
             await asyncio.sleep(60)
 
     async def wait_kick_space(self):
