@@ -1,6 +1,0 @@
-pydle
-aioredis
-aiohttp
-async-timeout
-hbmqtt
-pure-sasl
