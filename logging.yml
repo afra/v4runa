@@ -5,12 +5,12 @@ formatters:
 handlers:
   console:
     class: logging.StreamHandler
-    level: INFO
+    level: DEBUG
     formatter: simple
     stream: ext://sys.stdout
   logfile:
     class: logging.handlers.TimedRotatingFileHandler
-    level: INFO
+    level: DEBUG
     filename: v4runa.log
     formatter: simple
     backupCount: 7

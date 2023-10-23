@@ -314,7 +314,7 @@ class V4runaBot():
                                "Control head quarters. You can read more about me in the book Influx." % source)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
 
     loop = asyncio.get_event_loop()
     v4runa = V4runaBot(configpath="v4runa.cfg", loop=loop)
