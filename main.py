@@ -155,7 +155,7 @@ class V4runaBot():
         else:
             self.irc = MyOwnBot(self.user, realname=self.realname, join_channels=self.channels)
 
-        asyncio.ensure_future(self.irc.connect(self.server, tls=True, reconnect=True), loop=loop)
+        asyncio.ensure_future(self.irc.connect(self.server, tls=True), loop=loop)
 
         self.spacetoken = config.get("spaceapi", "token")
 
