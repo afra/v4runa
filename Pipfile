@@ -7,7 +7,7 @@ verify_ssl = true
 pure-sasl = "*"
 
 [packages]
-pydle = "*"
+pydle = "==0.9.4"
 aioredis = "==2.0.0"
 aiohttp = "*"
 async-timeout = "*"
