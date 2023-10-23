@@ -41,6 +41,8 @@ class MyOwnBot(pydle.Client):
             self.__join_channels = join_channels
 
     async def on_connect(self):
+        await super().on_connect()
+        LOG.info("Connected, joining channels %s", str(self.__join_channels))
         for channel in self.__join_channels:
             await self.join(channel)
 
@@ -155,7 +157,6 @@ class V4runaBot():
         else:
             self.irc = MyOwnBot(self.user, realname=self.realname, join_channels=self.channels)
 
-        asyncio.ensure_future(self.irc.connect(self.server, tls=True), loop=loop)
 
         self.spacetoken = config.get("spaceapi", "token")
 
@@ -167,6 +168,11 @@ class V4runaBot():
         self.irc.register_command("who", self.command_who)
         self.irc.register_command("help", self.command_help)
         self.irc.register_command("commands", self.command_help)
+
+    async def connect_irc(self):
+        LOG.info("connecting to irc %s", self.server)
+        await self.irc.connect(self.server, 6697, tls=True)
+        LOG.info("connected to irc")
 
     async def get_space(self):
         """ calculate by the timestamps if the space is open or not """
@@ -318,6 +324,7 @@ if __name__ == "__main__":
 
     loop = asyncio.get_event_loop()
     v4runa = V4runaBot(configpath="v4runa.cfg", loop=loop)
+    asyncio.ensure_future(v4runa.connect_irc(), loop=loop)
     asyncio.ensure_future(v4runa.wait_kick_space(), loop=loop)
     asyncio.ensure_future(v4runa.check_room_status(), loop=loop)
     loop.run_forever()
