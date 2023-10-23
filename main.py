@@ -6,6 +6,7 @@
 import logging
 import logging.config
 import yaml
+import sys
 import asyncio
 import async_timeout
 from datetime import datetime
@@ -319,6 +320,11 @@ class V4runaBot():
                                "Hi %s, I'm v4runa, the main AI construct. I'm integrated into the Bureau of Technology"
                                "Control head quarters. You can read more about me in the book Influx." % source)
 
+def exception_handler(loop, context=None):
+    LOG.exception("Uncatched exception happened.")
+    LOG.error("Emergency exit of v4runa")
+    sys.exit(1)
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
@@ -327,4 +333,5 @@ if __name__ == "__main__":
     asyncio.ensure_future(v4runa.connect_irc(), loop=loop)
     asyncio.ensure_future(v4runa.wait_kick_space(), loop=loop)
     asyncio.ensure_future(v4runa.check_room_status(), loop=loop)
+    loop.set_exception_handler(exception_handler)
     loop.run_forever()
