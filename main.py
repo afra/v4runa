@@ -25,9 +25,7 @@ LOG = logging.getLogger("v4runa")
 MQTT_CONFIG = {
     'keep_alive': 30,
     'ping_delay': 5,
-    'auto_reconnect': True,
-    'reconnect_max_interval': 5,
-    'reconnect_retries': 100,
+    'auto_reconnect': False,
 }
 
 class MyOwnBot(pydle.Client):
@@ -247,9 +245,9 @@ class V4runaBot():
         This function handles this event.
         """
 
-        self.mqcli = MQTTClient(config=MQTT_CONFIG, loop=self.loop)
         while True:
             try:
+                self.mqcli = MQTTClient(config=MQTT_CONFIG, loop=self.loop)
                 await self.mqcli.connect('mqtt://localhost/')
                 await self.mqcli.subscribe([
                     ('afra/door', QOS_2),
@@ -263,12 +261,18 @@ class V4runaBot():
             while True:
                 try:
                     message = await self.mqcli.deliver_message()
+                    # None when the connection is lost. Lets reconnect
+                    if message is None:
+                        break
+
                     LOG.info("mqtt: delivered a message")
                     # TODO: ignoring the payload for now
                     await self.store.set('door_kicked_timestamp', datetime.now().timestamp())
                     await self.check_state_change()
                 except ClientException as ce:
                     LOG.warning("mqtt: failed to connect. Retrying in 10 seconds.")
+                    break
+                except:
                     break
 
     async def set_space(self, state):
