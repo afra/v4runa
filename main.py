@@ -3,23 +3,21 @@
 # MIT
 # 2019 Alexander Couzens <lynxis@fe80.eu>
 
+import asyncio
 import logging
 import logging.config
-import yaml
-import sys
-import asyncio
-import async_timeout
-from datetime import datetime
-import pydle
 import re
-
-import aioredis
-import aiohttp
-
-from amqtt.client import MQTTClient, ClientException
-from amqtt.mqtt.constants import QOS_2
-
+import sys
 from configparser import ConfigParser
+from datetime import datetime
+
+import aiohttp
+import aioredis
+import async_timeout
+import pydle
+import yaml
+from amqtt.client import ClientException, MQTTClient
+from amqtt.mqtt.constants import QOS_2
 
 LOG = logging.getLogger("v4runa")
 
