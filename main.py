@@ -3,22 +3,21 @@
 # MIT
 # 2019 Alexander Couzens <lynxis@fe80.eu>
 
+import asyncio
 import logging
 import logging.config
-import yaml
+import re
 import sys
-import asyncio
-import async_timeout
-from datetime import datetime
-import pydle
-
-import aioredis
-import aiohttp
-
-from amqtt.client import MQTTClient, ClientException
-from amqtt.mqtt.constants import QOS_2
-
 from configparser import ConfigParser
+from datetime import datetime
+
+import aiohttp
+import aioredis
+import async_timeout
+import pydle
+import yaml
+from amqtt.client import ClientException, MQTTClient
+from amqtt.mqtt.constants import QOS_2
 
 LOG = logging.getLogger("v4runa")
 
@@ -224,6 +223,14 @@ class V4runaBot():
                 await self.irc.notice(channel, "The space is now %s." % human[state])
                 if state == _CLOSED:
                     await self.irc.notice(channel, ".purge")
+                await self.update_topic(channel, human[state])
+
+    async def update_topic(self, channel, state_human):
+        old_topic = channel['topic']
+        if not old_topic or ': ' not in old_topic:
+            return
+        new_topic = re.sub(r"(space[^:]*:) \w+", "\\1 " + state_human, old_topic, flags=re.IGNORECASE)
+        await self.irc.set_topic(channel, new_topic)
 
     async def check_room_status(self):
         """
